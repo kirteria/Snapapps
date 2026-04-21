@@ -1,1 +1,9 @@
-{ "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }] }
+{
+  "rewrites": [
+    { "source": "/snapscored", "destination": "/api/snapscored" },
+    { "source": "/snapscored/(.*)", "destination": "/api/snapscored" },
+    { "source": "/snapunks", "destination": "/api/snapunks" },
+    { "source": "/snapunks/(.*)", "destination": "/api/snapunks" },
+    { "source": "/", "destination": "/api/index" }
+  ]
+}
