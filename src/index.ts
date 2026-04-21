@@ -5,6 +5,8 @@ import { snapunks, generatePunkSvg } from "./snapunks/index.js";
 
 const app = new Hono();
 
+const FALLBACK_HTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>SnapApps</title></head><body style="background:#0a0a0a;color:#fff;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><p>Open in Farcaster to use this snap.</p></body></html>`;
+
 app.get("/snapunks/placeholder", (c) => {
   const S = 240;
   const u = S / 24;
@@ -29,9 +31,8 @@ app.get("/snapunks/punk/:fid", (c) => {
   return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
 });
 
-registerSnapHandler(app, snapscored, { path: "/snapscored", og: false });
-registerSnapHandler(app, snapunks, { path: "/snapunks", og: false });
-
+registerSnapHandler(app, snapscored, { path: "/snapscored", og: false, fallbackHtml: FALLBACK_HTML });
+registerSnapHandler(app, snapunks, { path: "/snapunks", og: false, fallbackHtml: FALLBACK_HTML });
 
 app.get("/", (c) => {
   return c.html(`<!DOCTYPE html>
