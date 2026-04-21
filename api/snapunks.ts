@@ -92,6 +92,12 @@ function generatePunkSvg(fid: number): string {
 
 const app = new Hono();
 
+app.get("/punk/:fid", (c) => {
+  const fid = parseInt(c.req.param("fid"), 10) || 1;
+  const svg = generatePunkSvg(fid);
+  return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
+});
+
 app.get("/placeholder", (c) => {
   const S = 240, u = S / 24;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
@@ -127,18 +133,17 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   }
 
   const fid = ctx.action.user.fid ?? 1;
-  const svgData = generatePunkSvg(fid);
-  const imgSrc = `data:image/svg+xml;base64,${Buffer.from(svgData).toString("base64")}`;
-  const shareText = `Just claimed my SnaPunk #${fid}! Every FID gets a unique one.\n\nGet yours -> snapapps.vercel.app/snapunks`;
+  const imgSrc = `${base}/snapunks/punk/${fid}`;
+  const shareText = `Just claimed my Punk #${fid}! Every FID gets a unique one.\n\nGet yours -> snapapps.vercel.app/snapunks`;
 
   return {
     version: "1.0",
-    theme: { accent: "purple" },
+    theme: { accent: "green" },
     ui: {
       root: "page",
       elements: {
         page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "punkImg", "btnRow"] },
-        title: { type: "text", props: { content: "Claim your SnaPunk", size: "md", weight: "bold", align: "center" } },
+        title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
         punkImg: { type: "image", props: { src: imgSrc, alt: `SnaPunk #${fid}`, aspectRatio: "1:1" } },
         btnRow: { type: "stack", props: { direction: "horizontal", gap: "sm", justify: "center" }, children: ["shareBtn"] },
         shareBtn: { type: "button", props: { label: "Share Punk", variant: "primary", icon: "share" }, on: { press: { action: "compose_cast", params: { text: shareText, embeds: [`${base}/snapunks`] } } } },
