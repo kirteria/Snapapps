@@ -29,8 +29,9 @@ app.get("/snapunks/punk/:fid", (c) => {
   return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
 });
 
-registerSnapHandler(app, snapscored, { path: "/snapscored" });
-registerSnapHandler(app, snapunks, { path: "/snapunks" });
+registerSnapHandler(app, snapscored, { path: "/snapscored", og: false });
+registerSnapHandler(app, snapunks, { path: "/snapunks", og: false });
+
 
 app.get("/", (c) => {
   return c.html(`<!DOCTYPE html>
