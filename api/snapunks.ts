@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { handle } from "hono/vercel";
 import { registerSnapHandler } from "@farcaster/snap-hono";
 import type { SnapHandlerResult } from "@farcaster/snap";
 
@@ -120,9 +119,4 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   };
 }, { og: false, fallbackHtml: FALLBACK });
 
-export default app;
-export const runtime = "edge";
-export const GET = handle(app);
-export const POST = handle(app);
-export const OPTIONS = handle(app);
-
+export default app.fetch.bind(app);
