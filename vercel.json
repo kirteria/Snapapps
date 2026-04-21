@@ -5,5 +5,10 @@
     { "source": "/snapunks", "destination": "/api/snapunks" },
     { "source": "/snapunks/(.*)", "destination": "/api/snapunks" },
     { "source": "/", "destination": "/api/index" }
-  ]
+  ],
+  "functions": {
+    "api/index.ts": { "memory": 256 },
+    "api/snapscored.ts": { "memory": 256 },
+    "api/snapunks.ts": { "memory": 256 }
+  }
 }
