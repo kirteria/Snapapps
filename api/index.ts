@@ -41,6 +41,6 @@ app.get("/", (c) => {
 </html>`);
 });
 
-export default app.fetch.bind(app);
 export { app };
+export default (req: Request) => app.fetch(req);
 
