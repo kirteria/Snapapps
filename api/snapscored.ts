@@ -143,7 +143,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   }
 });
 
-export default app.fetch.bind(app);
+export default app;
 
 
 
