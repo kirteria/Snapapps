@@ -96,7 +96,6 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   const url = new URL(ctx.request.url);
   const base = url.origin;
   const generated = url.searchParams.get("generated") === "1";
-  const fid: number = ctx.action?.user?.fid ?? 1;
 
   if (ctx.action.type !== "post" || !generated) {
     return {
@@ -105,15 +104,39 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
       ui: {
         root: "page",
         elements: {
-          page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "placeholder", "generateBtn"] },
-          title: { type: "text", props: { content: "Claim your SnaPunk", size: "md", weight: "bold", align: "center" } },
-          placeholder: { type: "image", props: { src: `${base}/snapunks/placeholder`, alt: "Your punk will appear here", aspectRatio: "1:1" } },
-          generateBtn: { type: "button", props: { label: "Generate Punk", variant: "primary", icon: "zap" }, on: { press: { action: "submit", params: { target: `${base}/snapunks?generated=1` } } } },
+          page: {
+            type: "stack",
+            props: { direction: "vertical", gap: "md" },
+            children: ["title", "placeholder", "generateBtn"],
+          },
+          title: {
+            type: "text",
+            props: { content: "Claim your SnaPunk", size: "md", weight: "bold", align: "center" },
+          },
+          placeholder: {
+            type: "image",
+            props: {
+              src: `${base}/snapunks/placeholder`,
+              alt: "Your punk will appear here",
+              aspectRatio: "1:1",
+            },
+          },
+          generateBtn: {
+            type: "button",
+            props: { label: "Generate Punk", variant: "primary", icon: "zap" },
+            on: {
+              press: {
+                action: "submit",
+                params: { target: `${base}/snapunks?generated=1` },
+              },
+            },
+          },
         },
       },
     };
   }
 
+  const fid: number = ctx.action.user.fid ?? 1;
   const imgSrc = `data:image/svg+xml;base64,${Buffer.from(generatePunkSvg(fid)).toString("base64")}`;
   const shareText = `Just claimed my SnaPunk #${fid}! Every FID gets a unique one.\n\nGet yours -> snapapps.vercel.app/snapunks`;
 
@@ -123,11 +146,37 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
     ui: {
       root: "page",
       elements: {
-        page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "punkImg", "btnRow"] },
-        title: { type: "text", props: { content: "Claim your SnaPunk", size: "md", weight: "bold", align: "center" } },
-        punkImg: { type: "image", props: { src: imgSrc, alt: `SnaPunk #${fid}`, aspectRatio: "1:1" } },
-        btnRow: { type: "stack", props: { direction: "horizontal", gap: "sm", justify: "center" }, children: ["shareBtn"] },
-        shareBtn: { type: "button", props: { label: "Share Punk", variant: "primary", icon: "share" }, on: { press: { action: "compose_cast", params: { text: shareText, embeds: [`${base}/snapunks`] } } } },
+        page: {
+          type: "stack",
+          props: { direction: "vertical", gap: "md" },
+          children: ["title", "punkImg", "btnRow"],
+        },
+        title: {
+          type: "text",
+          props: { content: "Claim your SnaPunk", size: "md", weight: "bold", align: "center" },
+        },
+        punkImg: {
+          type: "image",
+          props: { src: imgSrc, alt: `SnaPunk #${fid}`, aspectRatio: "1:1" },
+        },
+        btnRow: {
+          type: "stack",
+          props: { direction: "horizontal", gap: "sm", justify: "center" },
+          children: ["shareBtn"],
+        },
+        shareBtn: {
+          type: "button",
+          props: { label: "Share Punk", variant: "primary", icon: "share" },
+          on: {
+            press: {
+              action: "compose_cast",
+              params: {
+                text: shareText,
+                embeds: [`${base}/snapunks`],
+              },
+            },
+          },
+        },
       },
     },
   };
