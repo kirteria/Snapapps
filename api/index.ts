@@ -20,7 +20,7 @@ app.get("/", (c) => {
     .icon{font-size:2rem}
     .info h2{font-size:1rem;color:#fff;margin-bottom:.25rem}
     .info p{font-size:.75rem;color:#666}
-    footer{margin-top:3rem;color:#333;font-size:.7rem}
+    footer{margin-top:3rem;color:#a259ff;font-size:.7rem}
   </style>
 </head>
 <body>
@@ -36,7 +36,15 @@ app.get("/", (c) => {
       <div class="info"><h2>SnaPunks</h2><p>Claim your unique generative pixel punk art</p></div>
     </a>
   </div>
-  <footer>built by @weak</footer>
+  <footer>Made with 💜 by{' '} 
+     <a href="https://farcaster.xyz/weak"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-purple-500"
+      >
+        Weak
+    </a>
+ </footer>
 </body>
 </html>`);
 });
