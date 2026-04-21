@@ -2,8 +2,6 @@ import { Hono } from "hono";
 import { registerSnapHandler } from "@farcaster/snap-hono";
 import type { SnapHandlerResult } from "@farcaster/snap";
 
-const FALLBACK = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>SnaPunks</title></head><body style="background:#0a0a0a;color:#fff;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center"><p>Open in Farcaster to use SnaPunks.</p></body></html>`;
-
 const BACKGROUNDS = ["#1a0533","#0a0a0a","#001a1a","#0d0d2b","#1a0a00","#0a1a00","#1a0010","#000d1a"];
 const SKINS = ["#f5c89a","#d4956a","#a0632a","#6b3a1f","#7dbd6e"];
 const HAIR_STYLES = ["mohawk","long","bald","spiky","afro","cap"] as const;
@@ -25,7 +23,7 @@ function seededRng(seed: number) {
 function pick<T>(arr: readonly T[], rng: () => number): T {
   return arr[Math.floor(rng() * arr.length)];
 }
-function drawHair(style: Hair, color: string, u: number): string {
+function hair(style: Hair, color: string, u: number): string {
   switch (style) {
     case "mohawk": return `<rect x="${8*u}" y="0" width="${8*u}" height="${6*u}" fill="${color}" rx="${u}"/><rect x="${10*u}" y="${-2*u}" width="${4*u}" height="${4*u}" fill="${color}"/>`;
     case "long": return `<rect x="${4*u}" y="${2*u}" width="${16*u}" height="${4*u}" fill="${color}" rx="${u}"/><rect x="${3*u}" y="${6*u}" width="${3*u}" height="${10*u}" fill="${color}" rx="${u}"/><rect x="${18*u}" y="${6*u}" width="${3*u}" height="${10*u}" fill="${color}" rx="${u}"/>`;
@@ -35,7 +33,7 @@ function drawHair(style: Hair, color: string, u: number): string {
     case "cap": return `<rect x="${4*u}" y="${3*u}" width="${16*u}" height="${4*u}" fill="${color}" rx="${u}"/><rect x="${2*u}" y="${6*u}" width="${5*u}" height="${1.5*u}" fill="${color}"/>`;
   }
 }
-function drawEyes(style: Eye, u: number): string {
+function eyes(style: Eye, u: number): string {
   switch (style) {
     case "normal": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${8*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#222"/><rect x="${15*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#222"/>`;
     case "angry": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${8*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#ff2222"/><rect x="${15*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#ff2222"/><rect x="${6*u}" y="${9*u}" width="${4*u}" height="${1.5*u}" fill="#222" transform="rotate(15,${8*u},${9.5*u})"/><rect x="${14*u}" y="${9*u}" width="${4*u}" height="${1.5*u}" fill="#222" transform="rotate(-15,${16*u},${9.5*u})"/>`;
@@ -44,7 +42,7 @@ function drawEyes(style: Eye, u: number): string {
     case "laser": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22" rx="${u*.5}"/><rect x="0" y="${11*u}" width="${24*u}" height="${1.5*u}" fill="#f22" opacity="0.5"/>`;
   }
 }
-function drawMouth(style: Mouth, u: number): string {
+function mouth(style: Mouth, u: number): string {
   switch (style) {
     case "smirk": return `<rect x="${9*u}" y="${17*u}" width="${7*u}" height="${2*u}" fill="#c33" rx="${u*.5}"/><rect x="${14*u}" y="${16*u}" width="${2*u}" height="${u}" fill="#c33"/>`;
     case "frown": return `<rect x="${9*u}" y="${18*u}" width="${6*u}" height="${1.5*u}" fill="#c33" rx="${u*.5}"/><rect x="${9*u}" y="${17*u}" width="${1.5*u}" height="${1.5*u}" fill="#c33"/><rect x="${13.5*u}" y="${17*u}" width="${1.5*u}" height="${1.5*u}" fill="#c33"/>`;
@@ -52,7 +50,7 @@ function drawMouth(style: Mouth, u: number): string {
     case "gold": return `<rect x="${9*u}" y="${17*u}" width="${6*u}" height="${2*u}" fill="#c33" rx="${u*.5}"/><rect x="${11*u}" y="${17*u}" width="${2*u}" height="${2*u}" fill="#FFD700"/>`;
   }
 }
-function drawAccessory(style: Accessory, u: number): string {
+function accessory(style: Accessory, u: number): string {
   switch (style) {
     case "chain": return `<rect x="${7*u}" y="${20*u}" width="${10*u}" height="${u}" fill="#c0c0c0" rx="${u*.3}"/><rect x="${11*u}" y="${20*u}" width="${2*u}" height="${2*u}" fill="#FFD700" rx="${u*.5}"/>`;
     case "earring": return `<circle cx="${5*u}" cy="${14*u}" r="${1.5*u}" fill="#FFD700" stroke="#c0a000" stroke-width="${u*.5}"/>`;
@@ -62,6 +60,7 @@ function drawAccessory(style: Accessory, u: number): string {
     case "scar": return `<rect x="${16*u}" y="${11*u}" width="${u}" height="${5*u}" fill="#c00" rx="${u*.3}"/><rect x="${15.5*u}" y="${12*u}" width="${2*u}" height="${u*.8}" fill="#c00"/>`;
   }
 }
+
 function generatePunkSvg(fid: number): string {
   const rng = seededRng(fid * 7919 + 12345);
   const S = 240, u = S / 24;
@@ -73,10 +72,38 @@ function generatePunkSvg(fid: number): string {
   const mouthSt = pick(MOUTH_STYLES, rng);
   const accSt = pick(ACCESSORY_STYLES, rng);
   const shirt = pick(SHIRT_COLORS, rng);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges"><defs><pattern id="g" width="${u}" height="${u}" patternUnits="userSpaceOnUse"><path d="M ${u} 0 L 0 0 0 ${u}" fill="none" stroke="#fff" stroke-width="0.4"/></pattern></defs><rect width="${S}" height="${S}" fill="${bg}"/><rect width="${S}" height="${S}" fill="url(#g)" opacity="0.04"/><rect x="${3*u}" y="${19*u}" width="${18*u}" height="${5*u}" fill="${shirt}" rx="${u}"/><rect x="${10*u}" y="${17*u}" width="${4*u}" height="${3*u}" fill="${skin}"/><rect x="${5*u}" y="${5*u}" width="${14*u}" height="${13*u}" fill="${skin}" rx="${u}"/>${drawHair(hairSt,hairCol,u)}${drawEyes(eyeSt,u)}<rect x="${11*u}" y="${14*u}" width="${2*u}" height="${1.5*u}" fill="${skin}"/>${drawMouth(mouthSt,u)}${drawAccessory(accSt,u)}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
+  <defs><pattern id="g" width="${u}" height="${u}" patternUnits="userSpaceOnUse"><path d="M ${u} 0 L 0 0 0 ${u}" fill="none" stroke="#fff" stroke-width="0.4"/></pattern></defs>
+  <rect width="${S}" height="${S}" fill="${bg}"/>
+  <rect width="${S}" height="${S}" fill="url(#g)" opacity="0.04"/>
+  <rect x="${3*u}" y="${19*u}" width="${18*u}" height="${5*u}" fill="${shirt}" rx="${u}"/>
+  <rect x="${10*u}" y="${17*u}" width="${4*u}" height="${3*u}" fill="${skin}"/>
+  <rect x="${5*u}" y="${5*u}" width="${14*u}" height="${13*u}" fill="${skin}" rx="${u}"/>
+  ${hair(hairSt, hairCol, u)}
+  ${eyes(eyeSt, u)}
+  <rect x="${11*u}" y="${14*u}" width="${2*u}" height="${1.5*u}" fill="${skin}"/>
+  <rect x="${10*u}" y="${15*u}" width="${u}" height="${u}" fill="${skin}" opacity="0.7"/>
+  <rect x="${13*u}" y="${15*u}" width="${u}" height="${u}" fill="${skin}" opacity="0.7"/>
+  ${mouth(mouthSt, u)}
+  ${accessory(accSt, u)}
+  <rect width="${S}" height="${S}" fill="none" stroke="#ffffff" stroke-width="${u*.3}" opacity="0.15"/>
+</svg>`;
 }
 
 const app = new Hono();
+
+app.get("/placeholder", (c) => {
+  const S = 240, u = S / 24;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
+  <defs><pattern id="g" width="${u}" height="${u}" patternUnits="userSpaceOnUse"><path d="M ${u} 0 L 0 0 0 ${u}" fill="none" stroke="#fff" stroke-width="0.4"/></pattern></defs>
+  <rect width="${S}" height="${S}" fill="#1a0533"/>
+  <rect width="${S}" height="${S}" fill="url(#g)" opacity="0.04"/>
+  <rect x="10" y="10" width="${S-20}" height="${S-20}" fill="none" stroke="#a259ff" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
+  <text x="${S/2}" y="${S/2+30}" font-family="monospace" font-size="90" font-weight="bold" fill="#a259ff" text-anchor="middle" opacity="0.8">?</text>
+  <text x="${S/2}" y="${S-20}" font-family="monospace" font-size="10" fill="#666" text-anchor="middle">tap generate to reveal</text>
+</svg>`;
+  return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
+});
 
 registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   const url = new URL(ctx.request.url);
@@ -100,7 +127,8 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   }
 
   const fid = ctx.action.user.fid ?? 1;
-  const imgSrc = `data:image/svg+xml;base64,${Buffer.from(generatePunkSvg(fid)).toString("base64")}`;
+  const svgData = generatePunkSvg(fid);
+  const imgSrc = `data:image/svg+xml;base64,${Buffer.from(svgData).toString("base64")}`;
   const shareText = `Just claimed my SnaPunk #${fid}! Every FID gets a unique one.\n\nGet yours -> snapapps.vercel.app/snapunks`;
 
   return {
@@ -117,9 +145,6 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
       },
     },
   };
-}, { og: false, fallbackHtml: FALLBACK });
+});
 
 export default app;
-
-
-
